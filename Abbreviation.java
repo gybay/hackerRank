@@ -10,79 +10,44 @@ public class Solution {
 
     // Complete the abbreviation function below.
     static String abbreviation(String a, String b) {
-        /*if(a == b)
-            return "YES";
-        return abbreviation(a, b, a.length()-1, b.length()-1);*/
-         boolean[][] isValid = new boolean[a.length()+1][b.length()+1];
-        // initializing the first raw to all false; ie. if b is
-        // not empty, isValid will always be false
-        isValid[0][0] = true;
-        // array initialization - if a is non-empty but b is empty,
-        // then isValid == true iff remaining(a) != contain uppercase
-        boolean containsUppercase = false;
-        for (int k = 1; k <= a.length(); k++) {
-            int i = k - 1;
-            // if the pointer at string a is uppercase
-            if (a.charAt(i) <= 90 && a.charAt(i) >= 65 || containsUppercase) {
-                containsUppercase = true;
-                isValid[k][0] = false;
-            }
-            else isValid[k][0] = true;
-        }
-        // tabulation from start of string
-        for (int k = 1; k <= a.length(); k++) {
-            for (int l = 1; l <= b.length(); l++) {
-                int i = k - 1; int j = l - 1;
-                // when the characters are equal, set = previous character bool.
-                if (a.charAt(i) == b.charAt(j)) {
-                    isValid[k][l] = isValid[k-1][l-1];
-                    continue;
-                }
-                // elif uppercase a == b, set = prev character bool. or just eat a.
-                else if ((int) a.charAt(i) - 32 == (int) b.charAt(j)) {
-                    isValid[k][l] = isValid[k-1][l-1] || isValid[k-1][l];
-                    continue;
-                }
-                // elif a is uppercase and no more b, or uppercase a is not b, then false
-                else if (a.charAt(i) <= 90 && a.charAt(i) >= 65) {
-                    isValid[k][l] = false;
-                    continue;
-                }
-                //else just eat a
-                else {
-                    isValid[k][l] = isValid[k-1][l];
-                    continue;
-                }
-            }
-        }
-        return isValid[a.length()][b.length()]? "YES" : "NO";
-    }
+        int a_l = a.length(),
+            b_l = b.length();
+        boolean[][] dp_arr = new boolean[a_l + 1][b_l + 1]; // all items are false as def
+        dp_arr[0][0] = true;
 
-    static String abbreviation(String a, String b, int n, int m) {
-        if( m < 0){ 
-            return "YES";
+        // initiliaze first column
+        boolean isThereUp = false;
+        for(int i = 1; i <= a_l; i++){
+            if(( isThereUp // we have already seen an uppercase
+                || a.charAt(i-1) <= 90 && a.charAt(i-1) >= 65) // it is uppercase 
+                ){
+                dp_arr[i][0]=false;
+            } else 
+                dp_arr[i][0] = true;
         }
-        if( n < 0 && m >= 0  ){ 
-            System.out.println("23");
-            return "NO";
-        }
-        if(a.charAt(n) == b.charAt(m)){ // matches, continue
-            System.out.println(a.charAt(n) + " = " + b.charAt(m));
-            return abbreviation(a, b, n-1, m-1);
-        } else if(Character.toUpperCase(a.charAt(n)) == b.charAt(m)){ // matches with  conversion, continue
-            System.out.println("To upperCase " + a.charAt(n) + " = " + b.charAt(m));
-            return abbreviation(a, b, n-1, m-1);
-        } else{ // try removing
-            if(n-1 < m || Character.isUpperCase(a.charAt(n))){
-                System.out.println("35: n= " + n + " m= " + m + " remove: " + a.charAt(n));
-                return "NO";
-            } else {
-                return abbreviation(a, b, n-1, m);
+
+        // fill the rest
+        for(int i = 1; i <= a_l; i++){ // what we have
+            for(int j = 1; j <= b_l; j++){ // what we want
+                // same char, transfer the cross value
+                if(a.charAt(i-1) == b.charAt(j-1)) { 
+                    dp_arr[i][j] = dp_arr[i-1][j-1];
+                }
+                // lower case of b, we can change 
+                else if ((int)a.charAt(i-1) - 32 == (int)b.charAt(j-1)) {
+                    dp_arr[i][j] = dp_arr[i-1][j-1] || dp_arr[i-1][j];
+                } 
+                // an uppercase, nothing to do
+                else if (a.charAt(i-1) <= 90 && a.charAt(i-1) >= 65){
+                    dp_arr[i][j] = false;
+                } else { // lower case non equal char, remove
+                    dp_arr[i][j] = dp_arr[i-1][j];
+                }
             }
         }
-    }
-   
 
+        return dp_arr[a_l][b_l] ? "YES" : "NO";
+    }
 
     private static final Scanner scanner = new Scanner(System.in);
 
